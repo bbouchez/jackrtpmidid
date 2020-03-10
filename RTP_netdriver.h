@@ -8,10 +8,10 @@
  *  Copyright 2011 Benoit Bouchez. All rights reserved.
  *
  *  Licensing terms
- *  This file and the rtpmidid project are licensed under GNU LGPL licensing terms
- *  Use of this source code in commercial applications and/or products without
- *  written agreement of the author is STRICTLY FORBIDDEN
- *  Refer to LICENSE.TXT file for details
+ *  This file and the rtpmidid project are licensed under GNU LGPL licensing 
+ *  terms with an exception stating that rtpmidid code can be used within
+ *  proprietary software products without needing to publish related product
+ *  source code.
  */
 
 #ifndef __RTP_NETDRIVER_H__

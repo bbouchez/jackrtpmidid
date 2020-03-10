@@ -1,11 +1,16 @@
 /*
  *  MIDI_FIFO.h
- *  VSTizer
- *  Simple FIFO structure
+ *  Simple FIFO structure for MIDI communication
+ *  Author: Benoit BOUCHEZ (BEB
  *
  *  Created by Benoit BOUCHEZ on 16/03/12.
  *  Copyright 2012 BEBDigitalAudio. All rights reserved.
  *
+ *  Licensing terms
+ *  This file and the rtpmidid project are licensed under GNU LGPL licensing 
+ *  terms with an exception stating that rtpmidid code can be used within
+ *  proprietary software products without needing to publish related product
+ *  source code.
  */
 
 #ifndef __MIDI_FIFO_H__

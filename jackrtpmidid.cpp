@@ -4,12 +4,12 @@
  * Author: Benoit BOUCHEZ
  *
  * Created on 13 octobre 2019, 10:09
- 
+ *
  *  Licensing terms
- *  This file and the rtpmidid project are licensed under GNU LGPL licensing terms
- *  Use of this source code in commercial applications and/or products without
- *  written agreement of the author is STRICTLY FORBIDDEN
- *  Refer to LICENSE.TXT file for details
+ *  This file and the rtpmidid project are licensed under GNU LGPL licensing 
+ *  terms with an exception stating that rtpmidid code can be used within
+ *  proprietary software products without needing to publish related product
+ *  source code.
  */
 
 /*
