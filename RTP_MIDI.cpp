@@ -6,7 +6,7 @@
  *  Copyright 2011 Benoit Bouchez. All rights reserved.
  *
  *  Licensing terms
- *  This file and the rtpmidid project are licensed under GNU LGPL licensing 
+ *  This file and the rtpmidid project are licensed under GNU LGPL licensing
  *  terms with an exception stating that rtpmidid code can be used within
  *  proprietary software products without needing to publish related product
  *  source code.
@@ -30,7 +30,7 @@ CRTP_MIDI::CRTP_MIDI(TMIDI_FIFO_CHAR* CharQ, unsigned char* SYXOutBuffer, unsign
     DataSocket=INVALID_SOCKET;
     ControlSocket=INVALID_SOCKET;
     SessionState=SESSION_CLOSED;
-    
+
     InvitationOnCtrlSenderIP=0;      // IP address of sender of invitation received on control port
     InvitationOnDataSenderIP=0;      // IP address of sender of invitation received on data port
     SessionPartnerIP=0;
@@ -45,21 +45,21 @@ CRTP_MIDI::CRTP_MIDI(TMIDI_FIFO_CHAR* CharQ, unsigned char* SYXOutBuffer, unsign
     TimeCounter=0;
     SyncSequenceCounter=0;
 
-    IsInitiatorNode=true;   
+    IsInitiatorNode=true;
     TimeOutRemote=4;
-	
+
     SysexSize=SYXOutSize;
     SysexBuffer=SYXOutBuffer;
     InterFragmentTimer=0;
     TransmittedSYSEXInFragment=0;
-	
+
     InSYSEXBufferSize=SYXInSize;
     InSYSEXBuffer=new unsigned char [InSYSEXBufferSize];
-	
+
     RTPStreamQueue=CharQ;
-	
+
     initRTP_SYSEXBuffer();
-	
+
     RTPCallback=CallbackFunc;
     ClientInstance=UserInstance;
 }  // CRTP_MIDI::CRTP_MIDI
@@ -69,7 +69,7 @@ CRTP_MIDI::~CRTP_MIDI(void)
 {
     CloseSession();
     CloseSockets();
-	
+
     if (InSYSEXBuffer!=0) delete InSYSEXBuffer;
 }  // CRTP_MIDI::~CRTP_MIDI
 //---------------------------------------------------------------------------
@@ -94,11 +94,11 @@ void CRTP_MIDI::PrepareTimerEvent (unsigned int TimeToWait)
 //---------------------------------------------------------------------------
 
 int CRTP_MIDI::InitiateSession(unsigned int DestIP,
-                                unsigned short DestCtrlPort, 
-				unsigned short DestDataPort, 
-				unsigned short LocalCtrlPort, 
+                                unsigned short DestCtrlPort,
+				unsigned short DestDataPort,
+				unsigned short LocalCtrlPort,
 				unsigned short LocalDataPort,
-				bool IsInitiator) 
+				bool IsInitiator)
 {
     int CreateError=0;
     bool SocketOK;
@@ -115,12 +115,12 @@ int CRTP_MIDI::InitiateSession(unsigned int DestIP,
     LastRTPCounter=0;
     LastFeedbackCounter=0;
     SyncSequenceCounter=0;
-	
+
     // Close the control and data sockets, just in case...
     CloseSockets();
-	
+
     // Open the two UDP sockets (we let the OS give us the local port number)
-    SocketOK=CreateUDPSocket (&ControlSocket, LocalControl, false);	
+    SocketOK=CreateUDPSocket (&ControlSocket, LocalControl, false);
     if (SocketOK==false) CreateError=-1;
     SocketOK=CreateUDPSocket (&DataSocket, LocalData, false);
     if (SocketOK==false) CreateError=-2;
@@ -131,7 +131,7 @@ int CRTP_MIDI::InitiateSession(unsigned int DestIP,
     }
     else
     {
-        // Sockets are opened, we start the session   
+        // Sockets are opened, we start the session
 	SYSEX_RTPActif=false;
 	SegmentSYSEXInput=false;
 	InviteCount=0;
@@ -197,15 +197,17 @@ void CRTP_MIDI::RunSession(void)
     unsigned int TS3H;
     unsigned int TS3L;
 
+    ssize_t ErrCode;
+
     TLongMIDIRTPMsg LRTPMessage;
     //TShortMIDIRTPMsg SRTPMesssage;
     sockaddr_in AdrEmit;
     int RTPOutSize;
-	
+
     // Computing time using the thread is not perfect, we should use OS time related data
     TimeCounter+=10;
     LocalClock+=10;
-    
+
     // Do not process if communication layers are not ready
     if (SocketLocked) return;
 
@@ -245,23 +247,23 @@ void CRTP_MIDI::RunSession(void)
     if (DataAvail(ControlSocket, 0))
     {
     	fromlen=sizeof(sockaddr_in);
-	RecvSize=(int)recvfrom(ControlSocket, (char*)&ReceptionBuffer, sizeof(ReceptionBuffer), 0, (sockaddr*)&SenderData, &fromlen);
+        RecvSize=(int)recvfrom(ControlSocket, (char*)&ReceptionBuffer, sizeof(ReceptionBuffer), 0, (sockaddr*)&SenderData, &fromlen);
 
-	if (RecvSize>0)
-	{  // Check if message is sent from configured partner
+        if (RecvSize>0)
+        {    // Check if message is sent from configured partner
             if ((htonl(SenderData.sin_addr.s_addr)==RemoteIP)||(RemoteIP==0))
             {
-                
+
                 // Check if this is an Apple session message
                 // This socket can react on two messages : INvitation and OK/NO (after inviting)
                 if ((ReceptionBuffer[0]==0xFF)&&(ReceptionBuffer[1]==0xFF))
                 {
-                    if ((ReceptionBuffer[2]=='I')&&(ReceptionBuffer[3]=='N')) 
+                    if ((ReceptionBuffer[2]=='I')&&(ReceptionBuffer[3]=='N'))
                     {
                         SessionPacket=(TSessionPacket*)&ReceptionBuffer[0];
                         InitiatorToken=htonl(SessionPacket->InitiatorToken);
                         InvitationReceivedOnCtrl=true;
-                  
+
                         // Store IP address and port from requestor, so we can send back the answer to correct destination
                         // Note that we can have to answer to any requestor, so we do not use the programmed destination address even if we are session initiator
                         InvitationOnCtrlSenderIP=htonl(SenderData.sin_addr.s_addr);
@@ -279,30 +281,30 @@ void CRTP_MIDI::RunSession(void)
     if (DataAvail(DataSocket, 0))
     {
     	fromlen=sizeof(sockaddr_in);
-	nRet=(int)recvfrom(DataSocket, (char*)&ReceptionBuffer, sizeof(ReceptionBuffer), 0, (sockaddr*)&SenderData, &fromlen);
+        nRet=(int)recvfrom(DataSocket, (char*)&ReceptionBuffer, sizeof(ReceptionBuffer), 0, (sockaddr*)&SenderData, &fromlen);
 
-	if (nRet>0)
-	{
+        if (nRet>0)
+        {
             if ((htonl(SenderData.sin_addr.s_addr)==RemoteIP)||(RemoteIP==0))
             {
                 // Check if this is a RTP message
-		if (SessionState==SESSION_OPENED)
-		{
+                if (SessionState==SESSION_OPENED)
+                {
                     if ((ReceptionBuffer[0]==0x80)&&(ReceptionBuffer[1]==0x61))
                     {
                         ProcessIncomingRTP(&ReceptionBuffer[0]);
                     }
-		}
-		
+                }
+
                 // Check if this is an Apple session message
-		if ((ReceptionBuffer[0]==0xFF)&&(ReceptionBuffer[1]==0xFF))
-		{
+                if ((ReceptionBuffer[0]==0xFF)&&(ReceptionBuffer[1]==0xFF))
+                {
                     if ((ReceptionBuffer[2]=='I')&&(ReceptionBuffer[3]=='N'))
                     {
                         SessionPacket=(TSessionPacket*)&ReceptionBuffer[0];
-			InitiatorToken=htonl(SessionPacket->InitiatorToken);
-			InvitationReceivedOnData=true;
-			RemoteData=htons(SenderData.sin_port);
+                        InitiatorToken=htonl(SessionPacket->InitiatorToken);
+                        InvitationReceivedOnData=true;
+                        RemoteData=htons(SenderData.sin_port);
                         InvitationOnDataSenderIP=htonl(SenderData.sin_addr.s_addr);
                     }
                     else if ((ReceptionBuffer[2]=='O')&&(ReceptionBuffer[3]=='K')) InvitationAcceptedOnData=true;
@@ -313,24 +315,24 @@ void CRTP_MIDI::RunSession(void)
                     else if ((ReceptionBuffer[2]='C')&&(ReceptionBuffer[3]=='K'))
                     {
                         SyncPacket=(TSyncPacket*)&ReceptionBuffer[0];
-			if (SyncPacket->Count==0) 
-			{
+                        if (SyncPacket->Count==0)
+                        {
                             ClockSync0Received=true;
                             if (VerboseRTP) printf ("CK0 received %x%x\n", htonl(SyncPacket->TS1H), htonl(SyncPacket->TS1L));
                             TS1H=htonl(SyncPacket->TS1H);
                             TS1L=htonl(SyncPacket->TS1L);
                         }
-			else if (SyncPacket->Count==1)
-			{
+                        else if (SyncPacket->Count==1)
+                        {
                             ClockSync1Received=true;
                             if (VerboseRTP) printf ("CK1 received %x%x - %x%x\n", htonl(SyncPacket->TS1H), htonl(SyncPacket->TS1L), htonl(SyncPacket->TS2H), htonl(SyncPacket->TS2L));
                             TS1H=htonl(SyncPacket->TS1H);
                             TS1L=htonl(SyncPacket->TS1L);
                             TS2H=htonl(SyncPacket->TS2H);
                             TS2L=htonl(SyncPacket->TS2L);
-			}
-			else if (SyncPacket->Count==2) 
-			{
+                        }
+                        else if (SyncPacket->Count==2)
+                        {
                             ClockSync2Received=true;
                             if (VerboseRTP) printf ("CK2 received %x%x - %x%x - %x%x\n", htonl(SyncPacket->TS1H), htonl(SyncPacket->TS1L), htonl(SyncPacket->TS2H), htonl(SyncPacket->TS2L), htonl(SyncPacket->TS3H), htonl(SyncPacket->TS3L));
                             TS1H=htonl(SyncPacket->TS1H);
@@ -340,10 +342,10 @@ void CRTP_MIDI::RunSession(void)
                             TS3H=htonl(SyncPacket->TS3H);
                             TS3L=htonl(SyncPacket->TS3L);
                         }
-                    }
-		}
+                    }  // Received a CK
+                }  // Received Apple session header
             }
-	}
+        }  // nRet > 0
     }  // Data received on data socket
 
     if (VerboseRTP)
@@ -363,33 +365,33 @@ void CRTP_MIDI::RunSession(void)
     // *** Non state related answers ***
     if (ClockSync0Received)
     {
-	SendSyncPacket(1, TS1H, TS1L, 0, TimeCounter, 0, 0);    
-	if (VerboseRTP) printf ("CK1 sent\n");
+        SendSyncPacket(1, TS1H, TS1L, 0, TimeCounter, 0, 0);
+        if (VerboseRTP) printf ("CK1 sent\n");
     }
 
     if ((ClockSync1Received)&&(SessionState==SESSION_OPENED))
-    {  
-	SendSyncPacket(2, TS1H, TS1L, TS2H, TS2L, 0, TimeCounter);    
-	if (VerboseRTP) printf ("CK2 sent (Session opened)\n");
+    {
+        SendSyncPacket(2, TS1H, TS1L, TS2H, TS2L, 0, TimeCounter);
+        if (VerboseRTP) printf ("CK2 sent (Session opened)\n");
     }
 
     if (ClockSync2Received)
     {
     	TimeOutRemote=4;
-	SessionState=SESSION_OPENED;
-	//PrepareTimerEvent(30000);
+        SessionState=SESSION_OPENED;
+        //PrepareTimerEvent(30000);
     }
 
     if (InvitationReceivedOnCtrl)
     {
         // TODO : send a NO if session is already opened with another remote entity
-    SendInvitationReply(true, true, 0);
+        SendInvitationReply(true, true, 0);
     }
 
     if (InvitationReceivedOnData)
     {
         // TODO : send a NO if session is already opened with another remote entity
-	SendInvitationReply(false, true, 0);
+        SendInvitationReply(false, true, 0);
         if (IsInitiatorNode==false)
         {
             SessionPartnerIP=InvitationOnDataSenderIP;      // TODO : only of session is accepted and if we are Session Listener
@@ -418,61 +420,64 @@ void CRTP_MIDI::RunSession(void)
     // NOTE : we must process the SESSION_OPENED state, since it is used to send RTP-MIDI blocks
     // The other states are flushing the MIDI queue from client by default
     if (SessionState==SESSION_OPENED)
-    {  
+    {
     	// Check if there is not a delay request (to avoid Kiss-Box output buffer overflow)
     	if (InterFragmentTimer>0)
     	{
             InterFragmentTimer--;
-	}
-		
-	// Check if any data waiting to be sent to network and no time still needed
-	if (InterFragmentTimer==0) RTPOutSize=PrepareMessage(&LRTPMessage, TimeCounter, false);
-	else RTPOutSize=0;
-	if (RTPOutSize>0)
-	{
+        }
+
+        // Check if any data waiting to be sent to network and no time still needed
+        if (InterFragmentTimer==0) RTPOutSize=PrepareMessage(&LRTPMessage, TimeCounter, false);
+        else RTPOutSize=0;
+
+        //if (RTPOutSize!=0) printf ("%d\n", RTPOutSize);
+
+        if (RTPOutSize>0)
+        {
             RTPSequence++;  // Increment for next message
             // Send message on network
             memset (&AdrEmit, 0, sizeof(sockaddr_in));
             AdrEmit.sin_family=AF_INET;
-            AdrEmit.sin_addr.s_addr=htonl(RemoteIP);
+            AdrEmit.sin_addr.s_addr=htonl(SessionPartnerIP);    // V0.6 : use SessionPartnerIP, not Remote IP
             AdrEmit.sin_port=htons(RemoteData);
-            sendto(DataSocket, (const char*)&LRTPMessage, RTPOutSize, 0, (const sockaddr*)&AdrEmit, sizeof(sockaddr_in));
-	}
-	  
-	// Resynchronize clock with remote node every 30 seconds if we are initiator
-	if (TimerRunning==false)
-	{
+            ErrCode=sendto(DataSocket, (const char*)&LRTPMessage, RTPOutSize, 0, (const sockaddr*)&AdrEmit, sizeof(sockaddr_in));
+        }
+
+        // Resynchronize clock with remote node every 30 seconds if we are initiator
+        if (TimerRunning==false)
+        {
             if (TimerEvent)
             {
                 // Send a RS packet if we have received something meanwhile (do not send the RS if nothing has been received, it crashes the Apple driver)
-		if (LastRTPCounter!=LastFeedbackCounter)
-		{
+                if (LastRTPCounter!=LastFeedbackCounter)
+                {
                     SendFeedbackPacket(LastRTPCounter);
                     LastFeedbackCounter=LastRTPCounter;
-		}
+                }
 
-		if (IsInitiatorNode==true)
-		{  // Restart a synchronization sequence if we are session initiator
+                if (IsInitiatorNode==true)
+                {  // Restart a synchronization sequence if we are session initiator
                     SendSyncPacket(0, 0, TimeCounter, 0, 0, 0, 0);
-		}
+                }
 
-		// We send first a sync sequence 5 times every 1.5 seconds, then one sync sequence every 10 seconds
-		if (SyncSequenceCounter<=5)
-		{
+                // We send first a sync sequence 5 times every 1.5 seconds, then one sync sequence every 10 seconds
+                if (SyncSequenceCounter<=5)
+                {
                     PrepareTimerEvent(1500);
                     SyncSequenceCounter+=1;
-		}
-		else
-		{
+                }
+                else
+                {
                     PrepareTimerEvent(10000);
-		}
+                }
 
-		if (TimeOutRemote>0) TimeOutRemote-=1;
-            }
-        }
-	return;
-    }
-	
+                if (TimeOutRemote>0) TimeOutRemote-=1;
+            }  // TimerEvent
+        }  // Timer not running
+        return;
+    }  // Session opened
+
     // We are inviting remote node on control port
     if (SessionState==SESSION_INVITE_CONTROL)
     {
@@ -484,7 +489,7 @@ void CRTP_MIDI::RunSession(void)
             PrepareTimerEvent(100);
             return;
 	}
-	
+
         if (TimerRunning==false)
 	{
             if (TimerEvent)
@@ -548,13 +553,13 @@ void CRTP_MIDI::RunSession(void)
         if (VerboseRTP)	printf ("Sent clock 0 from state SESSION_CLOCK_SYNC0\n");
 	return;
     }
-	
+
     if (SessionState==SESSION_CLOCK_SYNC1)
     {
 	if (VerboseRTP) printf ("Received clock 1 from state SESSION_CLOCK_SYNC1\n");
         if (ClockSync1Received) SessionState=SESSION_CLOCK_SYNC2;
 	return;
-    }	
+    }
 
     if (SessionState==SESSION_CLOCK_SYNC2)
     {
@@ -577,10 +582,10 @@ int CRTP_MIDI::GeneratePayload (unsigned char* MIDIList, bool FlushOnly)
     unsigned int Count;
     unsigned int SysexLen;
     unsigned int RemainingBytes;
-	  
+
     CtrBytePayload=0;
     FullPayload=false;
-		
+
     // Check if there is any SYSEX data waiting to be sent from Downloader or Uploader
     // If so, initialize the buffer
     // TODO : check if it is not interesting to exit immediately when the RTP buffer is filled with SYSEX
@@ -599,27 +604,27 @@ int CRTP_MIDI::GeneratePayload (unsigned char* MIDIList, bool FlushOnly)
                     for (Count=0; Count<SYSEX_FRAGMENT_SIZE; Count++)
                         MIDIList[CtrBytePayload+Count]=SysexBuffer[Count];
                     CtrBytePayload+=SYSEX_FRAGMENT_SIZE;
-				
+
                     // Add trailing 0xF0 for fragment
                     MIDIList[CtrBytePayload]=0xF0;
                     CtrBytePayload+=1;
-					
+
                     // Count first block of data
                     TransmittedSYSEXInFragment=SYSEX_FRAGMENT_SIZE;
-					
+
                     // 512 bytes take 131ms to be transmitted : do not send more data for 131 ms
                     InterFragmentTimer=131;
-		
+
                     return CtrBytePayload;
 		}  // First SYSEX fragment
-		else 
+		else
 		{  // Next SYSEX fragment
                     // Create header
                     MIDIList[CtrBytePayload]=0x00;  // Deltatime
                     CtrBytePayload+=1;
                     MIDIList[CtrBytePayload]=0xF7;  // Add leading 0xF7 for next segments
                     CtrBytePayload+=1;
-					
+
                     // Count how many bytes still need to be transmitted
                     SysexLen-=TransmittedSYSEXInFragment;
                     if (SysexLen>SYSEX_FRAGMENT_SIZE) RemainingBytes=SYSEX_FRAGMENT_SIZE;
@@ -629,24 +634,24 @@ int CRTP_MIDI::GeneratePayload (unsigned char* MIDIList, bool FlushOnly)
                         MIDIList[CtrBytePayload+Count]=SysexBuffer[Count+TransmittedSYSEXInFragment];
                     CtrBytePayload+=RemainingBytes;
                     TransmittedSYSEXInFragment+=RemainingBytes;
-					
+
                     // Add trailing 0xF0 for fragment
                     if (SysexLen-RemainingBytes>0)
                     {  // Not the last segment : add a trailing 0xF0
                         MIDIList[CtrBytePayload]=0xF0;
 			CtrBytePayload+=1;
                     }
-					
+
                     // 512 bytes take 131ms to be transmitted : do not send more data for 131 ms
                     InterFragmentTimer=131;
-					
+
                     // Signal end of transmission if all bytes are sent
                     if (TransmittedSYSEXInFragment>=(*SysexSize))
                     {
                         TransmittedSYSEXInFragment=0;		// Prepare for next transmission
 			*SysexSize=0;
                     }
-					
+
                     return CtrBytePayload;
 		}
             }
@@ -658,13 +663,13 @@ int CRTP_MIDI::GeneratePayload (unsigned char* MIDIList, bool FlushOnly)
                     MIDIList[CtrBytePayload+Count+1]=SysexBuffer[Count];
 		CtrBytePayload+=SysexLen;
 		CtrBytePayload+=1;
-		
+
 		// Reset the marker to inform client that it can transmit a new set of SYSEX data
 		*SysexSize=0;
             }
 	}
     }  // SYSEX data to transmit
-	
+
     // TODO : ******* check that message is not full for each of coming steps before putting new data *********
 
     // Check if we have data in the RTP stream
@@ -680,7 +685,7 @@ int CRTP_MIDI::GeneratePayload (unsigned char* MIDIList, bool FlushOnly)
                 TempPtr=RTPStreamQueue->ReadPtr;
                 MIDIList[CtrBytePayload]=RTPStreamQueue->FIFO[TempPtr];
                 CtrBytePayload+=1;
-			
+
                 TempPtr+=1;
                 if (TempPtr>=MIDI_CHAR_FIFO_SIZE)
                     TempPtr=0;
@@ -688,7 +693,7 @@ int CRTP_MIDI::GeneratePayload (unsigned char* MIDIList, bool FlushOnly)
             }
         }
     }
-		
+
     return CtrBytePayload;
 }  // CRTP_MIDI::GeneratePayload
 //--------------------------------------------------------------------------
@@ -713,7 +718,7 @@ int CRTP_MIDI::PrepareMessage (TLongMIDIRTPMsg* Buffer, unsigned int TimeStamp, 
     Buffer->Header.SequenceNumber=htons(RTPSequence);
     Buffer->Header.Timestamp=htonl(TimeStamp);
     Buffer->Header.SSRC=htonl(SSRC);
-    return TailleMIDI+sizeof(TRTP_Header)+2;  // 2 = size of control word 
+    return TailleMIDI+sizeof(TRTP_Header)+2;  // 2 = size of control word
 }  // CRTP_MIDI::PrepareMessage
 //--------------------------------------------------------------------------
 

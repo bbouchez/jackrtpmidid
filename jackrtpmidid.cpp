@@ -23,6 +23,9 @@
  V0.5 - 21/03/2020
  - added SIGINT signal handler for proper program termination
  - removed commented code sections from older tests
+
+ V0.6 - 22/03/2020
+ - bug corrected in RTP_MIDI.cpp : transmission from Zynthian was not working (wrong destination IP address)
  */
 
 #include <stdio.h>
@@ -241,7 +244,7 @@ int main(int argc, char** argv)
     int Ret;
     jack_client_t *client;
 
-    printf ("JACK <-> RTP-MIDI bridge V0.5 for Zynthian\n");
+    printf ("JACK <-> RTP-MIDI bridge V0.6 for Zynthian\n");
     printf ("Copyright 2019/2020 Benoit BOUCHEZ (BEB)\n");
     printf ("Please report any issue to BEB on https:\\discourse.zynthian.org\n");
 
