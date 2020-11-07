@@ -32,7 +32,7 @@ bool CreateUDPSocket (TSOCKTYPE* sock, unsigned short NumPort, bool shouldReuse)
     int errcode;
 
     // Create UDP/IP socket
-    *sock=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    *sock=socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
     if (*sock==INVALID_SOCKET) return false;
 
     if (NumPort==0) return true;  // Do not bind the socket to a specific listening port
