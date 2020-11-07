@@ -27,7 +27,7 @@ bool CreateUDPSocket (TSOCKTYPE* sock, unsigned short NumPort, bool shouldReuse)
 // NumPort = port number to listen to
 {
     long nRet;
-    sockaddr_in AdrRecv;
+    sockaddr_in6 AdrRecv;
     int optval;
     int errcode;
 
@@ -49,10 +49,10 @@ bool CreateUDPSocket (TSOCKTYPE* sock, unsigned short NumPort, bool shouldReuse)
     }
 
     // Create local sink address
-    memset (&AdrRecv, 0, sizeof(sockaddr_in));
-    AdrRecv.sin_family=AF_INET;
-    AdrRecv.sin_port=htons(NumPort);
-    AdrRecv.sin_addr.s_addr=htonl(INADDR_ANY);
+    memset (&AdrRecv, 0, sizeof(sockaddr_in6));
+    AdrRecv.sin6_family=AF_INET6;
+    AdrRecv.sin6_port=htons(NumPort);
+    AdrRecv.sin6_addr=IN6ADDR_ANY_INIT;
 
     nRet=bind(*sock, (const sockaddr*)&AdrRecv, sizeof(AdrRecv));
     if (nRet==-1)
@@ -98,4 +98,13 @@ bool DataAvail (TSOCKTYPE sock, unsigned int WaitTimeMS)
 
     return false;
 }  // DataAvail
+//---------------------------------------------------------------------------
+
+bool are_ipv6_equal(struct in6_addr ipA, struct in6_addr ipB)
+{
+    for(int i = 0; i < 16; i++)
+        if (ipA.s6_addr[i] != ipB.s6_addr[i])
+            return false;
+    return true;
+}  // are_ipv6_equal
 //---------------------------------------------------------------------------

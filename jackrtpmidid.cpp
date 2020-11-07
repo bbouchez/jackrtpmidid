@@ -272,7 +272,7 @@ int main(int argc, char** argv)
     if (RTPMIDIHandler)
     {
         RTPMIDIHandler->setSessionName((char*)"Zynthian RTP-MIDI");
-        Ret=RTPMIDIHandler->InitiateSession (0, 5004, 5005, 5004, 5005, false);
+        Ret=RTPMIDIHandler->InitiateSession (IN6ADDR_ANY_INIT, 5004, 5005, 5004, 5005, false);
         if (Ret==-1) fprintf (stderr, "jackrtpmidid : can not create control socket\n");
         else if (Ret==-2) fprintf (stderr, "jackrtpmidid : can not create data socket\n");
         if (Ret!=0)
