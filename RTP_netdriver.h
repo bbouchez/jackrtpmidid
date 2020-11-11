@@ -37,5 +37,7 @@ bool CreateUDPSocket (TSOCKTYPE* sock, unsigned short NumPort, bool shouldReuse)
 //! Close a socket created by CreateUDPSocket
 void CloseSocket (TSOCKTYPE* sock);
 
+bool are_ipv6_equal(struct in6_addr ipA, struct in6_addr ipB);
+
 #endif /* __RTP_NETDRIVER_H__ */
 

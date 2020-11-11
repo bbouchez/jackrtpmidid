@@ -35,7 +35,7 @@
 // Max size for a single fragmented SYSEX
 #define SYSEX_FRAGMENT_SIZE		512
 
-#define DEFAULT_RTP_ADDRESS 0xC0A800FD
+#define ZERO_RTP_ADDRESS {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 #define DEFAULT_RTP_DATA_PORT 5004
 #define DEFAULT_RTP_CTRL_PORT 5003
 
@@ -172,7 +172,7 @@ public:
 	
 	//! Activate network resources and starts communication (tries to open session) with remote node
 	// \return 0=session being initiated -1=can not create control socket -2=can not create data socket
-	int InitiateSession(unsigned int DestIP,
+	int InitiateSession(struct in6_addr DestIP,
 						unsigned short DestCtrlPort, 
 						unsigned short DestDataPort, 
 						unsigned short LocalCtrlPort, 
@@ -199,16 +199,16 @@ private:
 
 	unsigned char SessionName [MAX_SESSION_NAME_LEN];
 	
-	unsigned int RemoteIP;			// Address of remote computer (0 if module is used as session listener)
+	struct in6_addr RemoteIP;			// Address of remote computer (0 if module is used as session listener)
 	unsigned short RemoteControl;	// Remote control port number (0 if module is used as session listener)
 	unsigned short RemoteData;		// Remote data port number (0 if module is used as session listener)
 	unsigned short LocalControl;	// Local control port number
 	unsigned short LocalData;		// Local data port number
     
-    unsigned int InvitationOnCtrlSenderIP;      // IP address of sender of invitation received on control port
-    unsigned int InvitationOnDataSenderIP;      // IP address of sender of invitation received on data port
-    unsigned int SessionPartnerIP;              // IP address of session partner (only valid if session is opened)
-    unsigned int CheckerIP;                     // IP address of device checking genuine KB software
+    struct in6_addr InvitationOnCtrlSenderIP;      // IP address of sender of invitation received on control port
+    struct in6_addr InvitationOnDataSenderIP;      // IP address of sender of invitation received on data port
+    struct in6_addr SessionPartnerIP;              // IP address of session partner (only valid if session is opened)
+    struct in6_addr CheckerIP;                     // IP address of device checking genuine KB software
    
 	TSOCKTYPE ControlSocket;
 	TSOCKTYPE DataSocket;
