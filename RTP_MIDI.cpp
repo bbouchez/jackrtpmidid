@@ -11,6 +11,12 @@
  *  proprietary software products without needing to publish related product
  *  source code.
  */
+ 
+ /*
+ Release notes :
+ 12/10/2021 :
+  - bug corrected in test : "=" was used in place of "=="  -> else if ((ReceptionBuffer[2]='C')...
+ */
 
 #include "RTP_MIDI.h"
 #include <string.h>
@@ -21,7 +27,7 @@ bool VerboseRTP=false;
 
 CRTP_MIDI::CRTP_MIDI(TMIDI_FIFO_CHAR* CharQ, unsigned char* SYXOutBuffer, unsigned int* SYXOutSize, unsigned int SYXInSize, TRTPDataCallback CallbackFunc, void* UserInstance)
 {
-    RemoteIP={0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    RemoteIP=DEFAULT_RTP_ADDRESS;
     RemoteControl=DEFAULT_RTP_CTRL_PORT;
     RemoteData=DEFAULT_RTP_DATA_PORT;
     LocalControl=DEFAULT_RTP_CTRL_PORT;
@@ -31,9 +37,9 @@ CRTP_MIDI::CRTP_MIDI(TMIDI_FIFO_CHAR* CharQ, unsigned char* SYXOutBuffer, unsign
     ControlSocket=INVALID_SOCKET;
     SessionState=SESSION_CLOSED;
 
-    InvitationOnCtrlSenderIP={0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};      // IP address of sender of invitation received on control port
-    InvitationOnDataSenderIP={0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};      // IP address of sender of invitation received on data port
-    SessionPartnerIP={0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    InvitationOnCtrlSenderIP=0;      // IP address of sender of invitation received on control port
+    InvitationOnDataSenderIP=0;      // IP address of sender of invitation received on data port
+    SessionPartnerIP=0;
     strcpy ((char*)&this->SessionName[0], "");
 
     SocketLocked=true;
@@ -93,7 +99,7 @@ void CRTP_MIDI::PrepareTimerEvent (unsigned int TimeToWait)
 }  // CRTP_MIDI::PrepareTimerEvent
 //---------------------------------------------------------------------------
 
-int CRTP_MIDI::InitiateSession(struct in6_addr DestIP,
+int CRTP_MIDI::InitiateSession(unsigned int DestIP,
                                 unsigned short DestCtrlPort,
 				unsigned short DestDataPort,
 				unsigned short LocalCtrlPort,
@@ -172,7 +178,7 @@ void CRTP_MIDI::RunSession(void)
     int nRet;
     socklen_t fromlen;
 
-    sockaddr_in6 SenderData;
+    sockaddr_in SenderData;
     unsigned char ReceptionBuffer[1024];
     bool InvitationReceivedOnCtrl;
     bool InvitationReceivedOnData;
@@ -200,8 +206,7 @@ void CRTP_MIDI::RunSession(void)
     ssize_t ErrCode;
 
     TLongMIDIRTPMsg LRTPMessage;
-    //TShortMIDIRTPMsg SRTPMesssage;
-    sockaddr_in6 AdrEmit;
+    sockaddr_in AdrEmit;
     int RTPOutSize;
 
     // Computing time using the thread is not perfect, we should use OS time related data
@@ -214,13 +219,13 @@ void CRTP_MIDI::RunSession(void)
     // Check if timer elapsed
     if (TimerRunning)
     {
-	if (EventTime>0)
+		if (EventTime>0)
             EventTime--;
-	if (EventTime==0)
-	{
+		if (EventTime==0)
+		{
             TimerRunning=false;
             TimerEvent=true;
-	}
+		}
     }
 
     // If no resync from remote node after 2 minutes, close session
@@ -246,12 +251,12 @@ void CRTP_MIDI::RunSession(void)
     // Check if something has been received on control socket
     if (DataAvail(ControlSocket, 0))
     {
-    	fromlen=sizeof(sockaddr_in6);
+    	fromlen=sizeof(sockaddr_in);
         RecvSize=(int)recvfrom(ControlSocket, (char*)&ReceptionBuffer, sizeof(ReceptionBuffer), 0, (sockaddr*)&SenderData, &fromlen);
 
         if (RecvSize>0)
         {    // Check if message is sent from configured partner
-            if (are_ipv6_equal(SenderData.sin6_addr, RemoteIP)||are_ipv6_equal(RemoteIP, ZERO_RTP_ADDRESS))
+            if ((htonl(SenderData.sin_addr.s_addr)==RemoteIP)||(RemoteIP==0))
             {
 
                 // Check if this is an Apple session message
@@ -266,8 +271,8 @@ void CRTP_MIDI::RunSession(void)
 
                         // Store IP address and port from requestor, so we can send back the answer to correct destination
                         // Note that we can have to answer to any requestor, so we do not use the programmed destination address even if we are session initiator
-                        InvitationOnCtrlSenderIP=SenderData.sin6_addr;
-                        RemoteControl=htons(SenderData.sin6_port);
+                        InvitationOnCtrlSenderIP=htonl(SenderData.sin_addr.s_addr);
+                        RemoteControl=htons(SenderData.sin_port);
                     }
                     else if ((ReceptionBuffer[2]=='O')&&(ReceptionBuffer[3]=='K')) InvitationAcceptedOnCtrl=true;
                     else if ((ReceptionBuffer[2]=='N')&&(ReceptionBuffer[3]=='O')) InvitationRefusedOnCtrl=true;
@@ -280,12 +285,12 @@ void CRTP_MIDI::RunSession(void)
     // Check if something has been received on data socket
     if (DataAvail(DataSocket, 0))
     {
-    	fromlen=sizeof(sockaddr_in6);
+    	fromlen=sizeof(sockaddr_in);
         nRet=(int)recvfrom(DataSocket, (char*)&ReceptionBuffer, sizeof(ReceptionBuffer), 0, (sockaddr*)&SenderData, &fromlen);
 
         if (nRet>0)
         {
-            if (are_ipv6_equal(SenderData.sin6_addr, RemoteIP)||are_ipv6_equal(RemoteIP, ZERO_RTP_ADDRESS))
+            if ((htonl(SenderData.sin_addr.s_addr)==RemoteIP)||(RemoteIP==0))
             {
                 // Check if this is a RTP message
                 if (SessionState==SESSION_OPENED)
@@ -304,15 +309,15 @@ void CRTP_MIDI::RunSession(void)
                         SessionPacket=(TSessionPacket*)&ReceptionBuffer[0];
                         InitiatorToken=htonl(SessionPacket->InitiatorToken);
                         InvitationReceivedOnData=true;
-                        RemoteData=htons(SenderData.sin6_port);
-                        InvitationOnDataSenderIP=SenderData.sin6_addr;
+                        RemoteData=htons(SenderData.sin_port);
+                        InvitationOnDataSenderIP=htonl(SenderData.sin_addr.s_addr);
                     }
                     else if ((ReceptionBuffer[2]=='O')&&(ReceptionBuffer[3]=='K')) InvitationAcceptedOnData=true;
                     else if ((ReceptionBuffer[2]=='N')&&(ReceptionBuffer[3]=='O')) InvitationRefusedOnData=true;
                     else if ((ReceptionBuffer[2]=='B')&&(ReceptionBuffer[3]=='Y')) ByeReceivedOnData=true;
 
                     // Check for synchronization message
-                    else if ((ReceptionBuffer[2]='C')&&(ReceptionBuffer[3]=='K'))
+                    else if ((ReceptionBuffer[2]=='C')&&(ReceptionBuffer[3]=='K'))
                     {
                         SyncPacket=(TSyncPacket*)&ReceptionBuffer[0];
                         if (SyncPacket->Count==0)
@@ -410,7 +415,7 @@ void CRTP_MIDI::RunSession(void)
         else
         {
             SessionState=SESSION_CLOSED; // TODO : only if sender IP is the one with which we have a connection
-            SessionPartnerIP=ZERO_RTP_ADDRESS;
+            SessionPartnerIP=0;
         }
     }
 
@@ -437,11 +442,11 @@ void CRTP_MIDI::RunSession(void)
         {
             RTPSequence++;  // Increment for next message
             // Send message on network
-            memset (&AdrEmit, 0, sizeof(sockaddr_in6));
-            AdrEmit.sin6_family=AF_INET6;
-            AdrEmit.sin6_addr=SessionPartnerIP;    // V0.6 : use SessionPartnerIP, not Remote IP
-            AdrEmit.sin6_port=htons(RemoteData);
-            ErrCode=sendto(DataSocket, (const char*)&LRTPMessage, RTPOutSize, 0, (const sockaddr*)&AdrEmit, sizeof(sockaddr_in6));
+            memset (&AdrEmit, 0, sizeof(sockaddr_in));
+            AdrEmit.sin_family=AF_INET;
+            AdrEmit.sin_addr.s_addr=htonl(SessionPartnerIP);    // V0.6 : use SessionPartnerIP, not Remote IP
+            AdrEmit.sin_port=htons(RemoteData);
+            ErrCode=sendto(DataSocket, (const char*)&LRTPMessage, RTPOutSize, 0, (const sockaddr*)&AdrEmit, sizeof(sockaddr_in));
         }
 
         // Resynchronize clock with remote node every 30 seconds if we are initiator
