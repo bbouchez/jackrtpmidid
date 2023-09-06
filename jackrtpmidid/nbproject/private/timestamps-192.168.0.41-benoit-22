@@ -1,0 +1,22 @@
+#Sun Sep 03 11:05:45 CEST 2023
+VERSION=1.3
+d\:\\zynthian\\jackrtpmidid\\jackrtpmidid.cpp=c1693727928000
+d\:\\zynthian\\jackrtpmidid\\jackrtpmidid\\main.cpp=c1693729796123
+d\:\\zynthian\\jackrtpmidid\\jackrtpmidid\\makefile=c1693729796138
+d\:\\zynthian\\jackrtpmidid\\jackrtpmidid\\nbproject\\makefile-debug.mk=c1693731191078
+d\:\\zynthian\\jackrtpmidid\\jackrtpmidid\\nbproject\\makefile-impl.mk=c1693729795299
+d\:\\zynthian\\jackrtpmidid\\jackrtpmidid\\nbproject\\makefile-release.mk=c1693731191107
+d\:\\zynthian\\jackrtpmidid\\jackrtpmidid\\nbproject\\makefile-variables.mk=c1693730713989
+d\:\\zynthian\\jackrtpmidid\\jackrtpmidid\\nbproject\\package-debug.bash=c1693730713929
+d\:\\zynthian\\jackrtpmidid\\jackrtpmidid\\nbproject\\package-release.bash=c1693730713970
+d\:\\zynthian\\jackrtpmidid\\jackrtpmidid\\nbproject\\private\\makefile-variables.mk=c1693729795447
+d\:\\zynthian\\jackrtpmidid\\jackrtpmidid\\nbproject\\project.xml=c1693730809032
+d\:\\zynthian\\jackrtpmidid\\network.cpp=c1689741580000
+d\:\\zynthian\\jackrtpmidid\\network.h=c1689741580000
+d\:\\zynthian\\jackrtpmidid\\rtp_midi.cpp=c1688206101000
+d\:\\zynthian\\jackrtpmidid\\rtp_midi.h=c1693727707000
+d\:\\zynthian\\jackrtpmidid\\rtp_midi_appleprotocol.cpp=c1688206084000
+d\:\\zynthian\\jackrtpmidid\\rtp_midi_input.cpp=c1693728524000
+d\:\\zynthian\\jackrtpmidid\\targettypes.h=c1584040473000
+d\:\\zynthian\\jackrtpmidid\\xplatformutils.cpp=c1681920572000
+d\:\\zynthian\\jackrtpmidid\\xplatformutils.h=c1619021740000
