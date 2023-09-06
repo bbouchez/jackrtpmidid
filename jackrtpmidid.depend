@@ -1,0 +1,124 @@
+# depslib dependency file v1.0
+1584787606 source:/home/benoit/Zynthian/JACK/rtpmidid/jackrtpmidid.cpp
+	<stdio.h>
+	<stdlib.h>
+	<errno.h>
+	<unistd.h>
+	<string.h>
+	<math.h>
+	<signal.h>
+	<jack/jack.h>
+	<jack/midiport.h>
+	"RTP_MIDI.h"
+	"MIDI_FIFO.h"
+
+1583864614 /home/benoit/Zynthian/JACK/rtpmidid/RTP_MIDI.h
+	"RTP_netdriver.h"
+	"MIDI_FIFO.h"
+
+1583864614 /home/benoit/Zynthian/JACK/rtpmidid/RTP_netdriver.h
+	<sys/socket.h>
+	<netinet/in.h>
+	<string.h>
+
+1583864614 /home/benoit/Zynthian/JACK/rtpmidid/MIDI_FIFO.h
+
+1584874751 source:/home/benoit/Zynthian/JACK/rtpmidid/RTP_MIDI.cpp
+	"RTP_MIDI.h"
+	<string.h>
+	<stdlib.h>
+	<stdio.h>
+
+1583864614 source:/home/benoit/Zynthian/JACK/rtpmidid/RTP_MIDI_AppleProtocol.cpp
+	"RTP_MIDI.h"
+	<stdio.h>
+
+1583864614 source:/home/benoit/Zynthian/JACK/rtpmidid/RTP_MIDI_Input.cpp
+	"RTP_MIDI.h"
+	<stdio.h>
+
+1583864614 source:/home/benoit/Zynthian/JACK/rtpmidid/RTP_netdriver.cpp
+	"RTP_netdriver.h"
+	<unistd.h>
+
+1688206101 source:/home/benoit/Zynthian/jackrtpmidid/RTP_MIDI.cpp
+	"RTP_MIDI.h"
+	<string.h>
+	<stdlib.h>
+	"XPlatformUtils.h"
+	<stdio.h>
+	<winsock.h>
+	"SystemMessageBox.h"
+	<mach/mach_init.h>
+	<mach/thread_policy.h>
+
+1693725166 /home/benoit/Zynthian/jackrtpmidid/RTP_MIDI.h
+	"network.h"
+
+1688206084 source:/home/benoit/Zynthian/jackrtpmidid/RTP_MIDI_AppleProtocol.cpp
+	"RTP_MIDI.h"
+	<stdio.h>
+
+1693724735 source:/home/benoit/Zynthian/jackrtpmidid/RTP_MIDI_Input.cpp
+	"RTP_MIDI.h"
+	<stdio.h>
+
+1583864614 source:/home/benoit/Zynthian/jackrtpmidid/RTP_netdriver.cpp
+	"RTP_netdriver.h"
+	<unistd.h>
+
+1583864614 /home/benoit/Zynthian/jackrtpmidid/RTP_netdriver.h
+	<sys/socket.h>
+	<netinet/in.h>
+	<string.h>
+
+1685776637 /home/benoit/Zynthian/jackrtpmidid/network.h
+	<sys/socket.h>
+	<netinet/in.h>
+	<sys/socket.h>
+	<netinet/in.h>
+	<string.h>
+	<winsock.h>
+	<winsock2.h>
+
+1619021740 /home/benoit/Zynthian/jackrtpmidid/XPlatformUtils.h
+	"TargetTypes.h"
+
+1584040473 /home/benoit/Zynthian/jackrtpmidid/TargetTypes.h
+	<vcl.h>
+	<windows.h>
+
+1693724644 source:/home/benoit/Zynthian/jackrtpmidid/jackrtpmidid.cpp
+	<stdio.h>
+	<stdlib.h>
+	<errno.h>
+	<unistd.h>
+	<string.h>
+	<math.h>
+	<signal.h>
+	<jack/jack.h>
+	<jack/midiport.h>
+	"RTP_MIDI.h"
+	"XPlatformUtils.h"
+
+1685767913 source:/home/benoit/Zynthian/jackrtpmidid/network.cpp
+	<vcl.h>
+	"network.h"
+	"XPlatformUtils.h"
+	<string.h>
+	<sys/types.h>
+	<unistd.h>
+	<fcntl.h>
+	<errno.h>
+	<signal.h>
+	<unistd.h>
+	<stdio.h>
+
+1681920572 source:/home/benoit/Zynthian/jackrtpmidid/XPlatformUtils.cpp
+	"XPlatformUtils.h"
+	<string.h>
+	<unistd.h>
+	<time.h>
+	<unistd.h>
+	<time.h>
+

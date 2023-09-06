@@ -1,7 +1,7 @@
 /*
  * File:   JackRTPMIDID.cpp
- * RTP-MIDI daemon for Jack
- * Author: Benoit BOUCHEZ
+ * RTP-MIDI daemon for Zynthian
+ * Author: Benoit BOUCHEZ (BEB)
  *
  * Created on 13 octobre 2019, 10:09
  *
@@ -10,11 +10,6 @@
  *  terms with an exception stating that rtpmidid code can be used within
  *  proprietary software products without needing to publish related product
  *  source code.
- */
-
-/*
- Command line options
- -verbosertp : displays applemidi session messages
  */
 
  /*
@@ -26,6 +21,12 @@
 
  V0.6 - 22/03/2020
  - bug corrected in RTP_MIDI.cpp : transmission from Zynthian was not working (wrong destination IP address)
+
+ V0.7 - 03/09/2023
+  - updated RTP-MIDI library (with many minor bugs corrected)
+  - verbosity option removed (only for debug)
+  - project reorganized to use BEB's libraries used in other projects
+  - code framework prepared to add NetUMP (MIDI 2.0 on Ethernet) support
  */
 
 #include <stdio.h>
@@ -40,7 +41,7 @@
 #include <jack/jack.h>
 #include <jack/midiport.h>
 #include "RTP_MIDI.h"
-#include "MIDI_FIFO.h"
+#include "XPlatformUtils.h"
 
 jack_port_t *input_port;
 jack_port_t *output_port;
@@ -50,11 +51,9 @@ CRTP_MIDI* RTPMIDIHandler=NULL;
 TMIDI_FIFO_CHAR MIDI2JACK;
 TMIDI_FIFO_CHAR JACK2RTP;
 
-extern bool VerboseRTP;
-
 // Function called when the RTP engine receives a valid MIDI message
 // Stores received MIDI bytes into FIFO to JACK (generates a MIDI stream)
-unsigned int RTPMIDICallback (void* Instance, unsigned int DataSize, unsigned char* DataBlock, unsigned int DeltaTime)
+void RTPMIDICallback (void* Instance, unsigned int DataSize, unsigned char* DataBlock, unsigned int DeltaTime)
 {
     unsigned int CurrentOutPtr;
     unsigned int TempInPtr;
@@ -66,21 +65,20 @@ unsigned int RTPMIDICallback (void* Instance, unsigned int DataSize, unsigned ch
 
     for (ByteCount=0; ByteCount<DataSize; ByteCount++)
     {
-	MIDI2JACK.FIFO[TempInPtr]=DataBlock[ByteCount];
-	TempInPtr+=1;
-	if (TempInPtr>=MIDI_CHAR_FIFO_SIZE) TempInPtr=0;
-	if (TempInPtr==CurrentOutPtr)
-	{
-            Overflow=true;
-            break;
-	}
+        MIDI2JACK.FIFO[TempInPtr]=DataBlock[ByteCount];
+        TempInPtr+=1;
+        if (TempInPtr>=MIDI_CHAR_FIFO_SIZE) TempInPtr=0;
+        if (TempInPtr==CurrentOutPtr)
+        {
+                Overflow=true;
+                break;
+        }
     }
 
     if (Overflow==false)
     {  // Update input pointer only if we have been able to store all data
         MIDI2JACK.WritePtr=TempInPtr;
     }
-    return 1;
 }  // RTPMIDICallback
 //-----------------------------------------------------------------------------
 
@@ -244,8 +242,8 @@ int main(int argc, char** argv)
     int Ret;
     jack_client_t *client;
 
-    printf ("JACK <-> RTP-MIDI bridge V0.6 for Zynthian\n");
-    printf ("Copyright 2019/2020 Benoit BOUCHEZ (BEB)\n");
+    printf ("JACK <-> RTP-MIDI bridge V0.7 for Zynthian\n");
+    printf ("Copyright 2019/2023 Benoit BOUCHEZ (BEB)\n");
     printf ("Please report any issue to BEB on https:\\discourse.zynthian.org\n");
 
     break_request=false;
@@ -257,10 +255,13 @@ int main(int argc, char** argv)
     JACK2RTP.ReadPtr=0;
     JACK2RTP.WritePtr=0;
 
+    // RTP-MIDI verbosity option removed (only for debug with SHOW_RTP_INFO define)
+    /*
     if (argc>=2)
     {
         if (strcmp(argv[1], "-verbosertp")==0) VerboseRTP=true;
     }
+    */
 
     if ((client = jack_client_open ("jackrtpmidid", JackNullOption, NULL)) == 0)
     {
@@ -268,11 +269,11 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    RTPMIDIHandler = new CRTP_MIDI (&JACK2RTP, 0, 0, 0, &RTPMIDICallback, 0);
+    RTPMIDIHandler = new CRTP_MIDI (2048, &RTPMIDICallback, 0);
     if (RTPMIDIHandler)
     {
         RTPMIDIHandler->setSessionName((char*)"Zynthian RTP-MIDI");
-        Ret=RTPMIDIHandler->InitiateSession (IN6ADDR_ANY_INIT, 5004, 5005, 5004, 5005, false);
+        Ret=RTPMIDIHandler->InitiateSession (0, 5004, 5005, 5004, 5005, false);
         if (Ret==-1) fprintf (stderr, "jackrtpmidid : can not create control socket\n");
         else if (Ret==-2) fprintf (stderr, "jackrtpmidid : can not create data socket\n");
         if (Ret!=0)

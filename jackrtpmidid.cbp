@@ -32,18 +32,20 @@
 		<Compiler>
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
+			<Add option="-D__TARGET_LINUX__" />
 		</Compiler>
 		<Linker>
 			<Add library="jack" />
 		</Linker>
-		<Unit filename="MIDI_FIFO.h" />
 		<Unit filename="RTP_MIDI.cpp" />
 		<Unit filename="RTP_MIDI.h" />
 		<Unit filename="RTP_MIDI_AppleProtocol.cpp" />
 		<Unit filename="RTP_MIDI_Input.cpp" />
-		<Unit filename="RTP_netdriver.cpp" />
-		<Unit filename="RTP_netdriver.h" />
+		<Unit filename="XPlatformUtils.cpp" />
+		<Unit filename="XPlatformUtils.h" />
 		<Unit filename="jackrtpmidid.cpp" />
+		<Unit filename="network.cpp" />
+		<Unit filename="network.h" />
 		<Extensions>
 			<code_completion />
 			<debugger />

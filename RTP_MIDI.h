@@ -2,13 +2,16 @@
  *  RTP_MIDI.h
  *  Generic class for RTP_MIDI session initiator/listener
  *
- *  Created by Benoit BOUCHEZ on 05/12/11.
- *  Copyright 2011 Benoit Bouchez. All rights reserved.
+ *  Created by Benoit BOUCHEZ (BEB)
  *
- *  Licensing terms
- *  This file and the rtpmidid project are licensed under GNU LGPL licensing terms
- *  Use of this source code in commercial applications and/or products without
- *  written agreement of the author is STRICTLY FORBIDDEN
+ *  Copyright Benoit BOUCHEZ
+ *
+ *  License
+ *  This file is licensed under GNU LGPL licensing terms
+ *  terms with an exception stating that rtpmidid code can be used within
+ *  proprietary software products without needing to publish related product
+ *  source code.
+ *
  */
 
 //---------------------------------------------------------------------------
@@ -16,8 +19,7 @@
 #define __RTP_MIDI_H__
 //---------------------------------------------------------------------------
 
-#include "RTP_netdriver.h"
-#include "MIDI_FIFO.h"
+#include "network.h"
 
 #define LONG_B_BIT 0x8000
 #define LONG_J_BIT 0x4000
@@ -35,18 +37,18 @@
 // Max size for a single fragmented SYSEX
 #define SYSEX_FRAGMENT_SIZE		512
 
-#define ZERO_RTP_ADDRESS {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+#define DEFAULT_RTP_ADDRESS 0xC0A800FD
 #define DEFAULT_RTP_DATA_PORT 5004
 #define DEFAULT_RTP_CTRL_PORT 5003
 
 // Session status
 #define SESSION_CLOSED			0	// No action
 #define SESSION_CLOSE			1	// Session should close in emergency
-#define SESSION_INVITE_CONTROL          2	// Sending invitation on control port
+#define SESSION_INVITE_CONTROL	2	// Sending invitation on control port
 #define SESSION_INVITE_DATA		3	// Sending invitation on data port
 #define SESSION_WAIT_INVITE		4	// Wait to be invited by remote station
 #define SESSION_CLOCK_SYNC0		5	// Send first synchro message and wait answer (CK0)
-#define SESSION_CLOCK_SYNC1		6       // Wait for CK1 message from remote node
+#define SESSION_CLOCK_SYNC1		6   // Wait for CK1 message from remote node
 #define SESSION_CLOCK_SYNC2		7	// Send second synchro message (CK2)
 #define SESSION_OPENED			8	// Session is opened, just generate background traffic now
 
@@ -87,13 +89,6 @@ typedef struct {
   unsigned int TS3H;    // Timestamp 3
   unsigned int TS3L;
 } TSyncPacket;
-
-typedef struct {
-  unsigned short ControlWord;   // Version/padding/extension/CSRCCount/Marker/PT
-  unsigned short SequenceNumber;
-  unsigned int Timestamp;
-  unsigned int SSRC;
-} TRTPHeader;
 
 typedef struct {
   unsigned char Reserved1;       // 0xFF
@@ -145,44 +140,60 @@ typedef struct {
 } TShortMIDIRTPMsg;
 #pragma pack (pop)
 
+#define MIDI_CHAR_FIFO_SIZE		2048
+
+typedef struct {
+	unsigned char FIFO[MIDI_CHAR_FIFO_SIZE];
+	unsigned int ReadPtr;
+	unsigned int WritePtr;
+} TMIDI_FIFO_CHAR;
+
+#ifdef __TARGET_MAC__
 // This callback is called from realtime thread. Processing time in the callback shall be kept to a minimum
-typedef unsigned int (*TRTPDataCallback) (void* UserInstance, unsigned int DataSize, unsigned char* DataBlock, unsigned int DeltaTime);
+typedef void (*TRTPMIDIDataCallback) (void* UserInstance, unsigned int DataSize, unsigned char* DataBlock, unsigned int DeltaTime);
+#endif
+
+#ifdef __TARGET_LINUX__
+typedef void (*TRTPMIDIDataCallback) (void* UserInstance, unsigned int DataSize, unsigned char* DataBlock, unsigned int DeltaTime);
+#endif
+
+#ifdef __TARGET_WIN__
+typedef void (CALLBACK *TRTPMIDIDataCallback) (void* UserInstance, unsigned int DataSize, unsigned char* DataBlock, unsigned int DeltaTime);
+#endif
+
 
 class CRTP_MIDI
 {
 public:
     unsigned int LocalClock;           // Timestamp counter following session initiator
-    
-    //! \param CharQ pointer to a FIFO containing pre-formed RTP-MIDI message (each MIDI message shall be preceded with a deltatime)
-    //! \param SYXOutBuffer pointer to an array containing a SYSEX message to send at the next thread call. No new message shall be put in the array until the variable pointed by SYXOutSize is reset by the realtime thread
-    //! \param SYXOutSize pointer to a variable indicating the size of message pointed by SYXOutBuffer. Set to 0 if the SYSEX transmission is not used.
+
     //! \param SYXInSize size of incoming SYSEX buffer (maximum size of input SYSEX message to be returned to application)
     //! \param CallbackFunc pointer a function which will be called each time a packet is received from RTP-MIDI. Set 0 to disable callback
     //! \param UserInstance value which will be passed in the callback function
-	CRTP_MIDI(	  TMIDI_FIFO_CHAR* CharQ,
-			  unsigned char* SYXOutBuffer, 
-			  unsigned int* SYXOutSize, 
-			  unsigned int SYXInSize, 
-			  TRTPDataCallback CallbackFunc, 
+	CRTP_MIDI(unsigned int SYXInSize,
+			  TRTPMIDIDataCallback CallbackFunc,
 			  void* UserInstance);
 	~CRTP_MIDI(void);
 
 	//! Record a session name. Shall be called before InitiateSession.
 	void setSessionName (char* Name);
-	
+
 	//! Activate network resources and starts communication (tries to open session) with remote node
 	// \return 0=session being initiated -1=can not create control socket -2=can not create data socket
-	int InitiateSession(struct in6_addr DestIP,
-						unsigned short DestCtrlPort, 
-						unsigned short DestDataPort, 
-						unsigned short LocalCtrlPort, 
+	int InitiateSession(unsigned int DestIP,
+						unsigned short DestCtrlPort,
+						unsigned short DestDataPort,
+						unsigned short LocalCtrlPort,
 						unsigned short LocalDataPort,
 						bool IsInitiator);
 	void CloseSession(void);
-	
-	//! Main processing function to call from high priority thread
+
+	//! Main processing function to call from high priority thread (audio or multimedia timer) every millisecond
 	void RunSession(void);
-	
+
+	//! Send a RTP-MIDI block (with leading delta-times)
+	bool SendRTPMIDIBlock (unsigned int BlockSize, unsigned char* MIDIData);
+
 	//! Returns the session status
 	/*!
 	 0 : session is closed
@@ -192,24 +203,39 @@ public:
 	 */
 	int getSessionStatus (void);
 
+	//! Returns measured latency (0xFFFFFFFF means latency not available) in 1/10 ms
+	unsigned int GetLatency (void);
+
+	//! Restarts session process after it has been closed by a remote partner
+	// This method is allowed only if RTP-MIDI handler has been declared as session initiator
+	void RestartSession (void);
+
+	//! Returns true if remote device does not reply anymore to sync / keepalive messages
+	//! The flag is reset after this method has been called (so the method returns true only one time when event has occured)
+	bool ReadAndResetConnectionLost (void);
+
+	//! Returns true if remote participant has sent a BY to close the session
+	//! The flag is reset after this method has been called (so the method returns true only one time)
+	bool RemotePeerClosedSession (void);
+
 private:
 	// Callback data
-	TRTPDataCallback RTPCallback;	// Callback for incoming RTP-MIDI message
+	TRTPMIDIDataCallback RTPCallback;	// Callback for incoming RTP-MIDI message
 	void* ClientInstance;
 
 	unsigned char SessionName [MAX_SESSION_NAME_LEN];
-	
-	struct in6_addr RemoteIP;			// Address of remote computer (0 if module is used as session listener)
+
+	unsigned int RemoteIP;			// Address of remote computer (0 if module is used as session listener)
 	unsigned short RemoteControl;	// Remote control port number (0 if module is used as session listener)
 	unsigned short RemoteData;		// Remote data port number (0 if module is used as session listener)
-	unsigned short LocalControl;	// Local control port number
-	unsigned short LocalData;		// Local data port number
-    
-    struct in6_addr InvitationOnCtrlSenderIP;      // IP address of sender of invitation received on control port
-    struct in6_addr InvitationOnDataSenderIP;      // IP address of sender of invitation received on data port
-    struct in6_addr SessionPartnerIP;              // IP address of session partner (only valid if session is opened)
-    struct in6_addr CheckerIP;                     // IP address of device checking genuine KB software
-   
+	//unsigned short LocalControl;	// Local control port number
+	//unsigned short LocalData;		// Local data port number
+
+    unsigned int InvitationOnCtrlSenderIP;      // IP address of sender of invitation received on control port
+    unsigned int InvitationOnDataSenderIP;      // IP address of sender of invitation received on data port
+    unsigned int SessionPartnerIP;              // IP address of session partner (only valid if session is opened)
+    unsigned int CheckerIP;                     // IP address of device checking genuine KB software
+
 	TSOCKTYPE ControlSocket;
 	TSOCKTYPE DataSocket;
 
@@ -226,17 +252,16 @@ private:
 	int TimeOutRemote;				// Counter to detect loss of remote node (reset when CK2 is received)
 	unsigned int SyncSequenceCounter;		// Count how may sync sequences have been sent after invitation
 
+	unsigned int MeasuredLatency;
+
 	bool TimerRunning;				// Event timer is running
 	bool TimerEvent;				// Event is signalled
-	unsigned int EventTime;                     // System time to which event will be signalled
-	
+	unsigned int EventTime;		// System time to which event will be signalled
+
 	unsigned int TimeCounter;		// Counter in 100us used for clock synchronization
-	
-	TMIDI_FIFO_CHAR* RTPStreamQueue;	// Streaming MIDI messages (typically coming from the Editor when used with VSTizer) with precomputed RTP deltatime
-	
-	unsigned int* SysexSize;		// Pointer to variable containing SYSEX data size to transmit
-	unsigned char* SysexBuffer;
-	
+
+	TMIDI_FIFO_CHAR RTPStreamQueue;		// Streaming MIDI messages with precomputed RTP deltatime
+
 	bool BlocSYSEX_RTP;			// Marks that we are placing a SYSEX event in an RTP block
 	unsigned int InterFragmentTimer;	// Number of milliseconds before we can send the next RTP block
 	unsigned int TransmittedSYSEXInFragment;		// Number of SYSEX data already transmitted in fragments
@@ -246,14 +271,24 @@ private:
 	unsigned char FullInMidiMsg[3];
 	bool IncomingThirdByte;
 	unsigned char RTPRunningStatus;	// Running status from network to client
-	
+
 	// Members to decode SYSEX data coming from network
 	unsigned int InSYSEXBufferSize;		// Size of SYSEX defragmentation buffer
 	bool SegmentSYSEXInput;				// SYSEX message is segmented across multiple RTP messages
 	unsigned char* InSYSEXBuffer;
 	unsigned int InSYSEXBufferPtr;		// Number of SYSEX bytes received
 	bool InSYSEXOverflow;				// Received SYSEX message can not fit in the local buffer
-        
+
+	unsigned int TS1H;
+	unsigned int TS1L;
+	unsigned int TS2H;
+	unsigned int TS2L;
+	unsigned int TS3H;
+	unsigned int TS3L;
+
+	bool ConnectionLost;				// Set to 1 when connection is lost after a session has opened successfully
+	bool PeerClosedSession;				// Set to 1 when we receive a BY message on a opened session
+
 	void CloseSockets(void);
 	void SendInvitation (bool DestControl);
 
@@ -272,9 +307,9 @@ private:
 
 	//! Create a MIDI code in Windows format
 	unsigned int PrepareCodeMIDI (char data1, char data2, char data3);
-	
+
 	//! Extracts and return delta time stored in network buffer
-	/*! 
+	/*!
 	 \param : BufPtr = pointer sur octets a lire dans le tampon RTP
 	 \param : ByteCtr = number of byte read (updated by function). Must contain the position of first byte to read at call
 	 */
@@ -282,30 +317,29 @@ private:
 
 	//! Fill the payload area of RTP buffer with MIDI data to send to the network
 	//! \return Number of bytes put in payload (0 = no data to be sent)
-	//! \param PurgeOnly if set, this method runs in a specific mode to purge queues from VST
-	int GeneratePayload (unsigned char* MIDIList, bool FlushOnly);
- 
+	int GeneratePayload (unsigned char* MIDIList);
+
 	//! Prepare a RTP_MIDI for sending on the network
 	//* Returns the size of generated message. Value 0 means no MIDI data to send */
-	int PrepareMessage (TLongMIDIRTPMsg* Buffer, unsigned int TimeStamp, bool FlushOnly);
+	int PrepareMessage (TLongMIDIRTPMsg* Buffer, unsigned int TimeStamp);
 
-	//! Analyze incoming RTP frame from network 
+	//! Analyze incoming RTP frame from network
 	/*! Buffer = buffer containing RTP message received */
 	void ProcessIncomingRTP (unsigned char* Buffer);
 
 	//! Read and decode next MIDI event in RTP reception buffer and send it to callback
 	void GenerateMIDIEvent(unsigned char* Buffer, int* ByteCtr, int TailleBloc, unsigned int DeltaTime);
-	
+
 	//! Initializes local SYSEX buffer
 	void initRTP_SYSEXBuffer(void);
-	
+
 	//! Store a byte in the SYSEX buffer
 	void storeRTP_SYSEXData (unsigned char SysexData);
-	
+
 	//! Send the SYSEX buffer to client
 	void sendRTP_SYSEXBuffer (unsigned int DeltaTime);
-	
-	//! Send the MIDI message to client (mex 3 bytes)
+
+	//! Send the MIDI message to client (max 3 bytes)
 	void sendMIDIToClient (unsigned int NumBytes, unsigned int DeltaTime);
 };
 
