@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="100">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <logicalFolder name="HeaderFiles"
+                   displayName="Header Files"
+                   projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="ResourceFiles"
+                   displayName="Resource Files"
+                   projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="SourceFiles"
+                   displayName="Source Files"
+                   projectFiles="true">
+      <itemPath>../../RTP-MIDI/RTP_MIDI.cpp</itemPath>
+      <itemPath>../../RTP-MIDI/RTP_MIDI.h</itemPath>
+      <itemPath>../../RTP-MIDI/RTP_MIDI_AppleProtocol.cpp</itemPath>
+      <itemPath>../../RTP-MIDI/RTP_MIDI_Input.cpp</itemPath>
+      <itemPath>../../../../../SDK/beb/common_src/SystemSleep.cpp</itemPath>
+      <itemPath>../../../../../SDK/beb/common_src/SystemSleep.h</itemPath>
+      <itemPath>../../../../../SDK/beb/common_src/TargetTypes.h</itemPath>
+      <itemPath>../jackrtpmidid.cpp</itemPath>
+      <itemPath>../../../../../SDK/beb/common_src/network.cpp</itemPath>
+      <itemPath>../../../../../SDK/beb/common_src/network.h</itemPath>
+    </logicalFolder>
+    <logicalFolder name="TestFiles"
+                   displayName="Test Files"
+                   projectFiles="false"
+                   kind="TEST_LOGICAL_FOLDER">
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Debug" type="1">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <preprocessorList>
+            <Elem>__TARGET_LINUX__</Elem>
+          </preprocessorList>
+        </cTool>
+        <ccTool>
+          <incDir>
+            <pElem>../../RTP-MIDI</pElem>
+            <pElem>../../../../../SDK/beb/common_src</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>__TARGET_LINUX__</Elem>
+          </preprocessorList>
+        </ccTool>
+        <linkerTool>
+          <linkerLibItems>
+            <linkerLibLibItem>jack</linkerLibLibItem>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <item path="../../../../../SDK/beb/common_src/SystemSleep.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../../../SDK/beb/common_src/SystemSleep.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../../../SDK/beb/common_src/TargetTypes.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../../../SDK/beb/common_src/network.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../../../SDK/beb/common_src/network.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../RTP-MIDI/RTP_MIDI.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../RTP-MIDI/RTP_MIDI.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../RTP-MIDI/RTP_MIDI_AppleProtocol.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../RTP-MIDI/RTP_MIDI_Input.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../jackrtpmidid.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+    </conf>
+    <conf name="Release" type="1">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <developmentMode>5</developmentMode>
+          <preprocessorList>
+            <Elem>__TARGET_LINUX__</Elem>
+          </preprocessorList>
+        </cTool>
+        <ccTool>
+          <developmentMode>5</developmentMode>
+          <incDir>
+            <pElem>../../RTP-MIDI</pElem>
+            <pElem>../../../../../SDK/beb/common_src</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>__TARGET_LINUX__</Elem>
+          </preprocessorList>
+        </ccTool>
+        <fortranCompilerTool>
+          <developmentMode>5</developmentMode>
+        </fortranCompilerTool>
+        <asmTool>
+          <developmentMode>5</developmentMode>
+        </asmTool>
+        <linkerTool>
+          <linkerLibItems>
+            <linkerLibLibItem>jack</linkerLibLibItem>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <item path="../../../../../SDK/beb/common_src/SystemSleep.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../../../SDK/beb/common_src/SystemSleep.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../../../SDK/beb/common_src/TargetTypes.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../../../SDK/beb/common_src/network.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../../../SDK/beb/common_src/network.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../RTP-MIDI/RTP_MIDI.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../RTP-MIDI/RTP_MIDI.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../RTP-MIDI/RTP_MIDI_AppleProtocol.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../RTP-MIDI/RTP_MIDI_Input.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../jackrtpmidid.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>
