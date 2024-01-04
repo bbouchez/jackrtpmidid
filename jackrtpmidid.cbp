@@ -33,19 +33,22 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 			<Add option="-D__TARGET_LINUX__" />
+			<Add directory="/home/benoit/SDK/beb/common_src" />
+			<Add directory="../RTP-MIDI" />
 		</Compiler>
 		<Linker>
 			<Add library="jack" />
 		</Linker>
-		<Unit filename="RTP_MIDI.cpp" />
-		<Unit filename="RTP_MIDI.h" />
-		<Unit filename="RTP_MIDI_AppleProtocol.cpp" />
-		<Unit filename="RTP_MIDI_Input.cpp" />
-		<Unit filename="XPlatformUtils.cpp" />
-		<Unit filename="XPlatformUtils.h" />
+		<Unit filename="../../../SDK/beb/common_src/SystemSleep.cpp" />
+		<Unit filename="../../../SDK/beb/common_src/SystemSleep.h" />
+		<Unit filename="../../../SDK/beb/common_src/TargetTypes.h" />
+		<Unit filename="../../../SDK/beb/common_src/network.cpp" />
+		<Unit filename="../../../SDK/beb/common_src/network.h" />
+		<Unit filename="../RTP-MIDI/RTP_MIDI.cpp" />
+		<Unit filename="../RTP-MIDI/RTP_MIDI.h" />
+		<Unit filename="../RTP-MIDI/RTP_MIDI_AppleProtocol.cpp" />
+		<Unit filename="../RTP-MIDI/RTP_MIDI_Input.cpp" />
 		<Unit filename="jackrtpmidid.cpp" />
-		<Unit filename="network.cpp" />
-		<Unit filename="network.h" />
 		<Extensions>
 			<code_completion />
 			<debugger />
