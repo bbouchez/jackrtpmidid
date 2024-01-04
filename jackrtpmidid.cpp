@@ -1,15 +1,32 @@
 /*
  * File:   JackRTPMIDID.cpp
- * RTP-MIDI daemon for Zynthian
+ * JACK RTP-MIDI daemon for Zynthian
  * Author: Benoit BOUCHEZ (BEB)
  *
  * Created on 13 octobre 2019, 10:09
  *
- *  Licensing terms
- *  This file and the rtpmidid project are licensed under GNU LGPL licensing
- *  terms with an exception stating that rtpmidid code can be used within
- *  proprietary software products without needing to publish related product
- *  source code.
+ * MIT License
+ *
+ * Copyright (c) 2019-2024 bbouchez
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
  */
 
  /*
@@ -27,6 +44,12 @@
   - verbosity option removed (only for debug)
   - project reorganized to use BEB's libraries used in other projects
   - code framework prepared to add NetUMP (MIDI 2.0 on Ethernet) support
+
+V0.8 - 04/01/2024
+  - moved to MIT license
+  - project modified to use BEB SDK and RTP-MIDI cross platform libraries
+        https://github.com/bbouchez/BEBSDK
+        https://github.com/bbouchez/RTP-MIDI
  */
 
 #include <stdio.h>
@@ -41,7 +64,7 @@
 #include <jack/jack.h>
 #include <jack/midiport.h>
 #include "RTP_MIDI.h"
-#include "XPlatformUtils.h"
+#include "SystemSleep.h"
 
 jack_port_t *input_port;
 jack_port_t *output_port;
@@ -242,7 +265,7 @@ int main(int argc, char** argv)
     int Ret;
     jack_client_t *client;
 
-    printf ("JACK <-> RTP-MIDI bridge V0.7 for Zynthian\n");
+    printf ("JACK <-> RTP-MIDI bridge V0.8 for Zynthian\n");
     printf ("Copyright 2019/2023 Benoit BOUCHEZ (BEB)\n");
     printf ("Please report any issue to BEB on https:\\discourse.zynthian.org\n");
 
@@ -300,7 +323,7 @@ int main(int argc, char** argv)
     while(break_request==false)
     {
         if (RTPMIDIHandler) RTPMIDIHandler->RunSession();
-        SystemWaitMS(1);        // Run RTP-MIDI process every millisecond
+        SystemSleepMillis(1);        // Run RTP-MIDI process every millisecond
     }
     printf ("Program termination requested by user\n");
 
