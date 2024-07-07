@@ -39,19 +39,18 @@
 		<Linker>
 			<Add library="jack" />
 		</Linker>
-		<Unit filename="../../../SDK/beb/common_src/SystemSleep.cpp" />
-		<Unit filename="../../../SDK/beb/common_src/SystemSleep.h" />
-		<Unit filename="../../../SDK/beb/common_src/TargetTypes.h" />
-		<Unit filename="../../../SDK/beb/common_src/network.cpp" />
-		<Unit filename="../../../SDK/beb/common_src/network.h" />
+		<Unit filename="../../SDK/beb/common_src/CThread.cpp" />
+		<Unit filename="../../SDK/beb/common_src/CThread.h" />
+		<Unit filename="../../SDK/beb/common_src/SystemSleep.cpp" />
+		<Unit filename="../../SDK/beb/common_src/SystemSleep.h" />
+		<Unit filename="../../SDK/beb/common_src/TargetTypes.h" />
+		<Unit filename="../../SDK/beb/common_src/network.cpp" />
+		<Unit filename="../../SDK/beb/common_src/network.h" />
 		<Unit filename="../RTP-MIDI/RTP_MIDI.cpp" />
 		<Unit filename="../RTP-MIDI/RTP_MIDI.h" />
 		<Unit filename="../RTP-MIDI/RTP_MIDI_AppleProtocol.cpp" />
 		<Unit filename="../RTP-MIDI/RTP_MIDI_Input.cpp" />
 		<Unit filename="jackrtpmidid.cpp" />
-		<Extensions>
-			<code_completion />
-			<debugger />
-		</Extensions>
+		<Extensions />
 	</Project>
 </CodeBlocks_project_file>

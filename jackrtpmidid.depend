@@ -173,3 +173,53 @@
 	<unistd.h>
 	<time.h>
 
+1720346129 source:/home/benoit/MIDI20/RTP-MIDI/RTP_MIDI.cpp
+	"RTP_MIDI.h"
+	<string.h>
+	<stdlib.h>
+	"SystemSleep.h"
+	<stdio.h>
+	<mach/mach_init.h>
+	<mach/thread_policy.h>
+
+1720259204 /home/benoit/MIDI20/RTP-MIDI/RTP_MIDI.h
+	"network.h"
+
+1720346094 source:/home/benoit/MIDI20/RTP-MIDI/RTP_MIDI_AppleProtocol.cpp
+	"RTP_MIDI.h"
+	<stdio.h>
+
+1720259204 source:/home/benoit/MIDI20/RTP-MIDI/RTP_MIDI_Input.cpp
+	"RTP_MIDI.h"
+	<stdio.h>
+
+1720345804 source:/home/benoit/MIDI20/jackrtpmidid/jackrtpmidid.cpp
+	<stdio.h>
+	<stdlib.h>
+	<errno.h>
+	<unistd.h>
+	<string.h>
+	<math.h>
+	<signal.h>
+	<jack/jack.h>
+	<jack/midiport.h>
+	"RTP_MIDI.h"
+	"SystemSleep.h"
+	"CThread.h"
+
+1702478098 /home/benoit/SDK/beb/common_src/CThread.h
+	<pthread.h>
+
+1702536112 source:/home/benoit/SDK/beb/common_src/CThread.cpp
+	<vcl.h>
+	<windows.h>
+	"string.h"
+	<unistd.h>
+	<mach/mach.h>
+	<mach/mach_time.h>
+	<mach/thread_policy.h>
+	"CThread.h"
+	"SystemSleep.h"
+	<stdio.h>
+	<string.h>
+

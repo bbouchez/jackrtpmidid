@@ -50,6 +50,13 @@ V0.8 - 04/01/2024
   - project modified to use BEB SDK and RTP-MIDI cross platform libraries
         https://github.com/bbouchez/BEBSDK
         https://github.com/bbouchez/RTP-MIDI
+
+V0.9 - 17/02/2024
+  - update to "cleaned" RTP-MIDI class
+
+V1.0 - 07/07/2024
+  - added support for a second connexion (allow the Zynthian to be controlled by sequencer and keyboard at the same time)
+  - main loop replaced by a high priority thread to get best possible timing even with high CPU load
  */
 
 #include <stdio.h>
@@ -65,14 +72,34 @@ V0.8 - 04/01/2024
 #include <jack/midiport.h>
 #include "RTP_MIDI.h"
 #include "SystemSleep.h"
+#include "CThread.h"
 
 jack_port_t *input_port;
 jack_port_t *output_port;
 bool break_request=false;
+CThread* RTThread=0;
 
-CRTP_MIDI* RTPMIDIHandler=NULL;
+CRTP_MIDI* RTPMIDIHandler1=0;
+CRTP_MIDI* RTPMIDIHandler2=0;
 TMIDI_FIFO_CHAR MIDI2JACK;
 TMIDI_FIFO_CHAR JACK2RTP;
+
+// High priority realtime thread for RTP-MIDI communication
+void* RTThreadFunc (CThread* Control)
+{
+    while (Control->ShouldStop==false)
+    {
+        if (RTPMIDIHandler1)
+            RTPMIDIHandler1->RunSession();
+        if (RTPMIDIHandler2)
+            RTPMIDIHandler2->RunSession();
+        SystemSleepMillis(1);
+    }
+    Control->IsStopped=true;
+    pthread_exit(NULL);
+    return 0;
+}  // RTThreadFunc
+//-----------------------------------------------------------------------------
 
 // Function called when the RTP engine receives a valid MIDI message
 // Stores received MIDI bytes into FIFO to JACK (generates a MIDI stream)
@@ -208,8 +235,6 @@ int jack_process(jack_nframes_t nframes, void *arg)
     // Generate RTP-MIDI payload (with null delta-time) for each event sent by JACK
     if(event_count >= 1)
     {
-        //printf("rtpmidid: %d events\n", event_count);
-
         // Make a snapshot of current FIFO position
         TempWrite=JACK2RTP.WritePtr;
 
@@ -247,7 +272,6 @@ void jack_shutdown(void *arg)
 {
     printf ("JACK has shut down\n");
     break_request=true;
-	//exit(1);
 }  // jack_shutdown
 // ----------------------------------------------------
 
@@ -263,10 +287,11 @@ void sig_handler (int signo)
 int main(int argc, char** argv)
 {
     int Ret;
+    int MaxPrio;
     jack_client_t *client;
 
-    printf ("JACK <-> RTP-MIDI bridge V0.8 for Zynthian\n");
-    printf ("Copyright 2019/2023 Benoit BOUCHEZ (BEB)\n");
+    printf ("JACK <-> RTP-MIDI bridge V1.0 for Zynthian\n");
+    printf ("Copyright 2019/2024 Benoit BOUCHEZ (BEB)\n");
     printf ("Please report any issue to BEB on https:\\discourse.zynthian.org\n");
 
     break_request=false;
@@ -278,31 +303,37 @@ int main(int argc, char** argv)
     JACK2RTP.ReadPtr=0;
     JACK2RTP.WritePtr=0;
 
-    // RTP-MIDI verbosity option removed (only for debug with SHOW_RTP_INFO define)
-    /*
-    if (argc>=2)
-    {
-        if (strcmp(argv[1], "-verbosertp")==0) VerboseRTP=true;
-    }
-    */
-
     if ((client = jack_client_open ("jackrtpmidid", JackNullOption, NULL)) == 0)
     {
         fprintf(stderr, "jackrtpmidid : JACK server not running\n");
         return 1;
     }
 
-    RTPMIDIHandler = new CRTP_MIDI (2048, &RTPMIDICallback, 0);
-    if (RTPMIDIHandler)
+    RTPMIDIHandler1 = new CRTP_MIDI (2048, &RTPMIDICallback, 0);
+    if (RTPMIDIHandler1)
     {
-        RTPMIDIHandler->setSessionName((char*)"Zynthian RTP-MIDI");
-        Ret=RTPMIDIHandler->InitiateSession (0, 5004, 5005, 5004, 5005, false);
-        if (Ret==-1) fprintf (stderr, "jackrtpmidid : can not create control socket\n");
-        else if (Ret==-2) fprintf (stderr, "jackrtpmidid : can not create data socket\n");
+        RTPMIDIHandler1->setSessionName((char*)"Zynthian RTP-MIDI 1");
+        Ret=RTPMIDIHandler1->InitiateSession (0, 5004, 5005, 5004, 5005, false);
+        if (Ret==-1) fprintf (stderr, "jackrtpmidid : can not create control socket for session 1\n");
+        else if (Ret==-2) fprintf (stderr, "jackrtpmidid : can not create data socket for session 1\n");
         if (Ret!=0)
         {
-            delete RTPMIDIHandler;
-            return 1;
+            delete RTPMIDIHandler1;
+            RTPMIDIHandler1 = 0;
+        }
+    }
+
+    RTPMIDIHandler2 = new CRTP_MIDI (2048, &RTPMIDICallback, 0);    // We can use the same callback for the two handlers, as they run in the same thread
+    if (RTPMIDIHandler2)
+    {
+        RTPMIDIHandler2->setSessionName((char*)"Zynthian RTP-MIDI 2");
+        Ret=RTPMIDIHandler2->InitiateSession (0, 5006, 5007, 5006, 5007, false);
+        if (Ret==-1) fprintf (stderr, "jackrtpmidid : can not create control socket for session 2\n");
+        else if (Ret==-2) fprintf (stderr, "jackrtpmidid : can not create data socket for session 2\n");
+        if (Ret!=0)
+        {
+            delete RTPMIDIHandler2;
+            RTPMIDIHandler2 = 0;
         }
     }
 
@@ -316,25 +347,51 @@ int main(int argc, char** argv)
     if (jack_activate (client))
     {
             fprintf(stderr, "jackrtpmidid : cannot activate client");
-            return 1;
+            return -1;
+    }
+
+    // Start realtime thread
+    MaxPrio = sched_get_priority_max(SCHED_FIFO);
+    RTThread = new CThread((ThreadFuncType*)RTThreadFunc, MaxPrio, 0);
+    if (RTThread == 0)
+    {
+        fprintf (stderr, "Can not create realtime communication thread");
+        return -2;
     }
 
     /* run until interrupted */
     while(break_request==false)
     {
-        if (RTPMIDIHandler) RTPMIDIHandler->RunSession();
-        SystemSleepMillis(1);        // Run RTP-MIDI process every millisecond
+        SystemSleepMillis(100);
     }
     printf ("Program termination requested by user\n");
 
+    // Stop realtime communication thread
+    if (RTThread)
+    {
+        printf ("Stopping realtime thread...\n");
+        RTThread->StopThread(500);
+        delete RTThread;
+        RTThread = 0;
+    }
+
     // Clean everything before we exit
     jack_client_close(client);
-    if (RTPMIDIHandler)
+
+    if (RTPMIDIHandler1)
     {
-        printf ("Closing RTP-MIDI handler...\n");
-        RTPMIDIHandler->CloseSession();
-        delete RTPMIDIHandler;
-        RTPMIDIHandler=0;
+        printf ("Closing RTP-MIDI handler for session 1...\n");
+        RTPMIDIHandler1->CloseSession();
+        delete RTPMIDIHandler1;
+        RTPMIDIHandler1=0;
+    }
+
+    if (RTPMIDIHandler2)
+    {
+        printf ("Closing RTP-MIDI handler for session 2...\n");
+        RTPMIDIHandler2->CloseSession();
+        delete RTPMIDIHandler2;
+        RTPMIDIHandler2=0;
     }
 
     printf ("Done...\n");

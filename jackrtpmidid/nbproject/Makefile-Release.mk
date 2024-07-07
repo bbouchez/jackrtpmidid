@@ -35,6 +35,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/_ext/65a73d24/CThread.o \
 	${OBJECTDIR}/_ext/65a73d24/SystemSleep.o \
 	${OBJECTDIR}/_ext/65a73d24/network.o \
 	${OBJECTDIR}/_ext/e6ab54e0/RTP_MIDI.o \
@@ -57,7 +58,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-ljack
+LDLIBSOPTIONS=-ljack -lpthread
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
@@ -66,6 +67,11 @@ LDLIBSOPTIONS=-ljack
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/jackrtpmidid: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/jackrtpmidid ${OBJECTFILES} ${LDLIBSOPTIONS}
+
+${OBJECTDIR}/_ext/65a73d24/CThread.o: ../../../../../SDK/beb/common_src/CThread.cpp
+	${MKDIR} -p ${OBJECTDIR}/_ext/65a73d24
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -D__TARGET_LINUX__ -I../../RTP-MIDI -I../../../../../SDK/beb/common_src -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/65a73d24/CThread.o ../../../../../SDK/beb/common_src/CThread.cpp
 
 ${OBJECTDIR}/_ext/65a73d24/SystemSleep.o: ../../../../../SDK/beb/common_src/SystemSleep.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/65a73d24

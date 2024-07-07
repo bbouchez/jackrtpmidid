@@ -12,16 +12,22 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <itemPath>../../RTP-MIDI/RTP_MIDI.cpp</itemPath>
-      <itemPath>../../RTP-MIDI/RTP_MIDI.h</itemPath>
-      <itemPath>../../RTP-MIDI/RTP_MIDI_AppleProtocol.cpp</itemPath>
-      <itemPath>../../RTP-MIDI/RTP_MIDI_Input.cpp</itemPath>
-      <itemPath>../../../../../SDK/beb/common_src/SystemSleep.cpp</itemPath>
-      <itemPath>../../../../../SDK/beb/common_src/SystemSleep.h</itemPath>
-      <itemPath>../../../../../SDK/beb/common_src/TargetTypes.h</itemPath>
+      <logicalFolder name="f2" displayName="RTP-MIDI" projectFiles="true">
+        <itemPath>../../RTP-MIDI/RTP_MIDI.cpp</itemPath>
+        <itemPath>../../RTP-MIDI/RTP_MIDI.h</itemPath>
+        <itemPath>../../RTP-MIDI/RTP_MIDI_AppleProtocol.cpp</itemPath>
+        <itemPath>../../RTP-MIDI/RTP_MIDI_Input.cpp</itemPath>
+      </logicalFolder>
+      <logicalFolder name="f1" displayName="SDK" projectFiles="true">
+        <itemPath>../../../../../SDK/beb/common_src/CThread.cpp</itemPath>
+        <itemPath>../../../../../SDK/beb/common_src/CThread.h</itemPath>
+        <itemPath>../../../../../SDK/beb/common_src/SystemSleep.cpp</itemPath>
+        <itemPath>../../../../../SDK/beb/common_src/SystemSleep.h</itemPath>
+        <itemPath>../../../../../SDK/beb/common_src/TargetTypes.h</itemPath>
+        <itemPath>../../../../../SDK/beb/common_src/network.cpp</itemPath>
+        <itemPath>../../../../../SDK/beb/common_src/network.h</itemPath>
+      </logicalFolder>
       <itemPath>../jackrtpmidid.cpp</itemPath>
-      <itemPath>../../../../../SDK/beb/common_src/network.cpp</itemPath>
-      <itemPath>../../../../../SDK/beb/common_src/network.h</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -35,11 +41,14 @@
       <itemPath>Makefile</itemPath>
     </logicalFolder>
   </logicalFolder>
+  <sourceRootList>
+    <Elem>D:\SDK\beb\common_src</Elem>
+  </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
     <conf name="Debug" type="1">
       <toolsSet>
-        <compilerSet>default</compilerSet>
+        <compilerSet>GNU|GNU</compilerSet>
         <dependencyChecking>true</dependencyChecking>
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
@@ -61,9 +70,20 @@
         <linkerTool>
           <linkerLibItems>
             <linkerLibLibItem>jack</linkerLibLibItem>
+            <linkerLibLibItem>pthread</linkerLibLibItem>
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <item path="../../../../../SDK/beb/common_src/CThread.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../../../SDK/beb/common_src/CThread.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../../../../../SDK/beb/common_src/SystemSleep.cpp"
             ex="false"
             tool="1"
@@ -105,7 +125,7 @@
     </conf>
     <conf name="Release" type="1">
       <toolsSet>
-        <compilerSet>default</compilerSet>
+        <compilerSet>GNU|GNU</compilerSet>
         <dependencyChecking>true</dependencyChecking>
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
@@ -135,9 +155,20 @@
         <linkerTool>
           <linkerLibItems>
             <linkerLibLibItem>jack</linkerLibLibItem>
+            <linkerLibLibItem>pthread</linkerLibLibItem>
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <item path="../../../../../SDK/beb/common_src/CThread.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../../../SDK/beb/common_src/CThread.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../../../../../SDK/beb/common_src/SystemSleep.cpp"
             ex="false"
             tool="1"

@@ -1,0 +1,25 @@
+#Sun Jul 07 14:28:55 CEST 2024
+VERSION=1.3
+d\:\\midi20\\projects\\wxapps\\jackrtpmidid\\jackrtpmidid.cpp=c1720355294510
+d\:\\midi20\\projects\\wxapps\\jackrtpmidid\\jackrtpmidid\\dist\\debug\\gnu-linux\\jackrtpmidid=c1708158033850
+d\:\\midi20\\projects\\wxapps\\jackrtpmidid\\jackrtpmidid\\dist\\release\\gnu-linux\\jackrtpmidid=c1708158033859
+d\:\\midi20\\projects\\wxapps\\jackrtpmidid\\jackrtpmidid\\makefile=c1704380964537
+d\:\\midi20\\projects\\wxapps\\jackrtpmidid\\jackrtpmidid\\nbproject\\makefile-debug.mk=c1720335148322
+d\:\\midi20\\projects\\wxapps\\jackrtpmidid\\jackrtpmidid\\nbproject\\makefile-impl.mk=c1704380964438
+d\:\\midi20\\projects\\wxapps\\jackrtpmidid\\jackrtpmidid\\nbproject\\makefile-release.mk=c1720335189718
+d\:\\midi20\\projects\\wxapps\\jackrtpmidid\\jackrtpmidid\\nbproject\\makefile-variables.mk=c1704380964491
+d\:\\midi20\\projects\\wxapps\\jackrtpmidid\\jackrtpmidid\\nbproject\\package-debug.bash=c1704380964466
+d\:\\midi20\\projects\\wxapps\\jackrtpmidid\\jackrtpmidid\\nbproject\\package-release.bash=c1704380964484
+d\:\\midi20\\projects\\wxapps\\jackrtpmidid\\jackrtpmidid\\nbproject\\private\\makefile-variables.mk=c1704380964491
+d\:\\midi20\\projects\\wxapps\\jackrtpmidid\\jackrtpmidid\\nbproject\\project.xml=c1720334275537
+d\:\\midi20\\projects\\wxapps\\rtp-midi\\rtp_midi.cpp=c1720346802518
+d\:\\midi20\\projects\\wxapps\\rtp-midi\\rtp_midi.h=c1720259204000
+d\:\\midi20\\projects\\wxapps\\rtp-midi\\rtp_midi_appleprotocol.cpp=c1720346833493
+d\:\\midi20\\projects\\wxapps\\rtp-midi\\rtp_midi_input.cpp=c1720259204000
+d\:\\sdk\\beb\\common_src\\cthread.cpp=c1702536112823
+d\:\\sdk\\beb\\common_src\\cthread.h=c1702478098103
+d\:\\sdk\\beb\\common_src\\network.cpp=c1702478988980
+d\:\\sdk\\beb\\common_src\\network.h=c1704022220470
+d\:\\sdk\\beb\\common_src\\systemsleep.cpp=c1720334472001
+d\:\\sdk\\beb\\common_src\\systemsleep.h=c1720334472024
+d\:\\sdk\\beb\\common_src\\targettypes.h=c1720334472041
